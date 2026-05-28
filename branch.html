@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملخص الإغلاق — الفرع</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #e8a020;
+    --accent2: #f0c060;
+    --red: #e05050;
+    --green: #40c080;
+    --blue: #5090e0;
+    --purple: #9060d0;
+    --orange: #e07030;
+    --teal: #30b0a0;
+    --text: #f0eee8;
+    --muted: #888898;
+    --radius: 16px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Tajawal',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(232,160,32,0.07) 0%, transparent 65%);
+    pointer-events:none; z-index:0;
+  }
+
+  /* HEADER */
+  header {
+    position:sticky; top:0; z-index:100;
+    background:rgba(10,10,15,0.94); backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+    padding:0 20px; height:64px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .back-btn {
+    width:38px; height:38px; border-radius:10px;
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--text); font-size:1rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    text-decoration:none; transition:all 0.2s; flex-shrink:0;
+  }
+  .back-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .logo {
+    width:40px; height:40px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    border-radius:11px; display:flex; align-items:center; justify-content:center;
+    font-size:18px; flex-shrink:0; box-shadow:0 0 16px rgba(232,160,32,0.3);
+  }
+  .header-info { flex:1; min-width:0; }
+  .header-info h1 { font-size:0.95rem; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .header-info p  { font-size:0.7rem; color:var(--muted); }
+  .header-date {
+    font-size:0.72rem; color:var(--muted);
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:8px; padding:5px 11px; white-space:nowrap; flex-shrink:0;
+  }
+
+  /* MAIN */
+  main { position:relative; z-index:1; padding:22px 18px; max-width:640px; margin:0 auto; }
+
+  /* DATE CHIPS */
+  .date-bar { display:flex; gap:8px; margin-bottom:20px; overflow-x:auto; padding-bottom:4px; }
+  .date-bar::-webkit-scrollbar { height:3px; }
+  .date-bar::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  .date-chip {
+    flex-shrink:0; padding:7px 14px; border-radius:20px;
+    font-size:0.76rem; font-weight:600; cursor:pointer;
+    border:1px solid var(--border); background:var(--surface);
+    color:var(--muted); transition:all 0.2s;
+  }
+  .date-chip.active { background:var(--accent); color:#000; border-color:var(--accent); box-shadow:0 0 12px rgba(232,160,32,0.4); }
+  .date-chip:hover:not(.active) { border-color:var(--accent); color:var(--accent); }
+
+  /* TOTAL CARD */
+  .total-card {
+    background:linear-gradient(135deg,rgba(232,160,32,0.1),rgba(240,192,96,0.04));
+    border:1px solid rgba(232,160,32,0.28);
+    border-radius:var(--radius); padding:20px; margin-bottom:20px;
+    display:flex; justify-content:space-between; align-items:center; gap:16px;
+  }
+  .total-left .lbl { font-size:0.75rem; color:var(--muted); margin-bottom:4px; }
+  .total-left .val { font-size:2rem; font-weight:900; color:var(--accent); line-height:1; }
+  .total-left .sub { font-size:0.7rem; color:var(--muted); margin-top:3px; }
+  .total-right { text-align:left; flex-shrink:0; }
+  .total-right .lbl { font-size:0.72rem; color:var(--muted); margin-bottom:4px; }
+  .total-right .val { font-size:1.4rem; font-weight:900; line-height:1; }
+  .total-right .val.pos { color:var(--green); }
+  .total-right .val.neg { color:var(--red); }
+  .total-right .sub { font-size:0.68rem; color:var(--muted); margin-top:3px; }
+
+  /* SECTION LABEL */
+  .section-lbl {
+    font-size:0.66rem; font-weight:800; letter-spacing:0.12em;
+    color:var(--muted); text-transform:uppercase; margin:20px 0 10px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-lbl::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ENTRY ROWS — money */
+  .entry-list { display:flex; flex-direction:column; gap:10px; }
+  .entry-row {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:13px 14px;
+    display:flex; align-items:center; gap:12px; transition:border-color 0.2s;
+  }
+  .entry-row:focus-within { border-color:var(--accent); }
+  .entry-icon {
+    width:40px; height:40px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.15rem; flex-shrink:0;
+  }
+  .icon-cash    { background:rgba(64,192,128,0.12); }
+  .icon-network { background:rgba(80,144,224,0.12); }
+  .icon-apps    { background:rgba(144,96,208,0.12); }
+  .icon-deliver { background:rgba(232,160,32,0.12); }
+  .icon-expense { background:rgba(224,80,80,0.12);  }
+  .entry-info { flex:1; }
+  .entry-name { font-size:0.9rem; font-weight:700; margin-bottom:2px; }
+  .entry-sub  { font-size:0.7rem; color:var(--muted); }
+  .input-wrap { position:relative; flex-shrink:0; }
+  .entry-input {
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--text); font-family:'Tajawal',sans-serif;
+    font-size:1rem; font-weight:800;
+    width:128px; padding:8px 40px 8px 10px;
+    border-radius:9px; text-align:right; direction:ltr; transition:border-color 0.2s;
+  }
+  .entry-input:focus { outline:none; border-color:var(--accent); }
+  .entry-input::placeholder { color:var(--border); font-weight:400; }
+  .cur-lbl {
+    position:absolute; left:9px; top:50%; transform:translateY(-50%);
+    font-size:0.68rem; font-weight:600; color:var(--muted); pointer-events:none;
+  }
+
+  /* ── OPS GRID (وقت / عدد / كمية) ── */
+  .ops-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .ops-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:14px;
+    display:flex; flex-direction:column; gap:8px;
+    transition:border-color 0.2s;
+  }
+  .ops-card:focus-within { border-color:var(--accent); }
+
+  .ops-top { display:flex; align-items:center; gap:9px; }
+  .ops-icon {
+    width:34px; height:34px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0;
+  }
+  .icon-time-open   { background:rgba(64,192,128,0.12); }
+  .icon-time-supply { background:rgba(80,144,224,0.12); }
+  .icon-skewers     { background:rgba(232,160,32,0.12); }
+  .icon-chicken     { background:rgba(224,80,80,0.12); }
+  .icon-time-close  { background:rgba(144,96,208,0.12); }
+
+  .ops-label { font-size:0.82rem; font-weight:700; line-height:1.2; }
+  .ops-sub   { font-size:0.68rem; color:var(--muted); margin-top:1px; }
+
+  .ops-input {
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--text); font-family:'Tajawal',sans-serif;
+    font-size:0.95rem; font-weight:700;
+    width:100%; padding:8px 12px; border-radius:9px;
+    text-align:center; transition:border-color 0.2s;
+  }
+  .ops-input:focus { outline:none; border-color:var(--accent); }
+  .ops-input::placeholder { color:var(--border); font-weight:400; font-size:0.8rem; }
+  .ops-input[type="time"] { direction:ltr; }
+
+  /* wide card spans 2 cols */
+  .ops-card.wide { grid-column:1 / -1; }
+
+  /* NOTES CARD */
+  .notes-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:14px; transition:border-color 0.2s;
+  }
+  .notes-card:focus-within { border-color:var(--red); }
+  .notes-top { display:flex; align-items:center; gap:9px; margin-bottom:10px; }
+  .notes-icon {
+    width:34px; height:34px; border-radius:9px;
+    background:rgba(224,80,80,0.12);
+    display:flex; align-items:center; justify-content:center; font-size:1rem;
+  }
+  .notes-label { font-size:0.88rem; font-weight:700; }
+  .notes-sub   { font-size:0.68rem; color:var(--muted); }
+  textarea.ops-input {
+    resize:vertical; min-height:80px;
+    text-align:right; direction:rtl;
+    font-size:0.88rem; line-height:1.5;
+  }
+
+  /* SAVE BTN */
+  .save-btn {
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; margin-top:22px; padding:16px;
+    border-radius:var(--radius);
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#000; font-family:'Tajawal',sans-serif;
+    font-size:1rem; font-weight:900; border:none; cursor:pointer;
+    transition:all 0.25s; box-shadow:0 4px 20px rgba(232,160,32,0.28);
+  }
+  .save-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(232,160,32,0.5); }
+  .save-btn:active { transform:translateY(0); }
+
+  /* HISTORY */
+  .history-wrap { margin-top:28px; margin-bottom:32px; }
+  .history-title {
+    font-size:0.66rem; font-weight:800; letter-spacing:0.12em;
+    color:var(--muted); text-transform:uppercase; margin-bottom:10px;
+  }
+  .history-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+  .h-head, .h-row {
+    display:grid; grid-template-columns:1fr 90px 80px 80px;
+    padding:11px 16px; gap:8px; font-size:0.76rem; align-items:center;
+  }
+  .h-head { color:var(--muted); font-weight:600; font-size:0.68rem; letter-spacing:0.05em; border-bottom:1px solid var(--border); }
+  .h-row  { border-bottom:1px solid rgba(42,42,58,0.5); transition:background 0.15s; cursor:pointer; }
+  .h-row:last-child { border-bottom:none; }
+  .h-row:hover { background:rgba(255,255,255,0.02); }
+  .h-row .d-col { color:var(--muted); font-size:0.72rem; }
+  .h-row .r-col { font-weight:700; color:var(--accent); font-size:0.82rem; }
+  .h-row .e-col { color:var(--red); font-size:0.8rem; }
+  .h-row .n-col { font-weight:800; font-size:0.82rem; }
+  .h-row .n-col.pos { color:var(--green); }
+  .h-row .n-col.neg { color:var(--red); }
+
+  /* TOAST */
+  .toast {
+    position:fixed; bottom:24px; left:50%;
+    transform:translateX(-50%) translateY(80px);
+    background:var(--green); color:#000; font-weight:800; font-size:0.85rem;
+    padding:12px 24px; border-radius:40px; z-index:999;
+    transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    white-space:nowrap; box-shadow:0 4px 20px rgba(64,192,128,0.4);
+  }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* STATUS TOGGLE */
+  .status-banner {
+    border-radius:var(--radius); padding:18px 20px; margin-bottom:20px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    border:1px solid; transition:all 0.4s ease;
+  }
+  .status-banner.open {
+    background:rgba(64,192,128,0.08);
+    border-color:rgba(64,192,128,0.35);
+    box-shadow:0 0 28px rgba(64,192,128,0.1);
+  }
+  .status-banner.closed {
+    background:rgba(224,80,80,0.08);
+    border-color:rgba(224,80,80,0.3);
+    box-shadow:0 0 28px rgba(224,80,80,0.08);
+  }
+  .status-left { display:flex; align-items:center; gap:12px; }
+  .status-pulse {
+    position:relative; width:14px; height:14px; flex-shrink:0;
+  }
+  .status-pulse span {
+    position:absolute; inset:0; border-radius:50%;
+    transition:background 0.4s;
+  }
+  .status-pulse span:first-child {
+    animation:pulse-ring 1.8s ease-out infinite;
+  }
+  .status-banner.closed .status-pulse span { animation:none; }
+  .status-banner.open  .status-pulse span:first-child { background:rgba(64,192,128,0.35); }
+  .status-banner.open  .status-pulse span:last-child  { background:var(--green); }
+  .status-banner.closed .status-pulse span:first-child { background:transparent; }
+  .status-banner.closed .status-pulse span:last-child  { background:var(--red); }
+
+  @keyframes pulse-ring {
+    0%   { transform:scale(1);   opacity:0.8; }
+    100% { transform:scale(2.6); opacity:0; }
+  }
+  .status-text-wrap .status-title { font-size:1rem; font-weight:800; transition:color 0.4s; }
+  .status-banner.open  .status-title { color:var(--green); }
+  .status-banner.closed .status-title { color:var(--red); }
+  .status-text-wrap .status-since { font-size:0.72rem; color:var(--muted); margin-top:2px; }
+
+  .toggle-btn {
+    flex-shrink:0; padding:10px 20px; border-radius:10px;
+    font-family:'Tajawal',sans-serif; font-size:0.88rem; font-weight:800;
+    border:none; cursor:pointer; transition:all 0.3s ease;
+  }
+  .status-banner.open  .toggle-btn { background:rgba(224,80,80,0.15); color:var(--red);   border:1px solid rgba(224,80,80,0.3); }
+  .status-banner.closed .toggle-btn { background:rgba(64,192,128,0.15); color:var(--green); border:1px solid rgba(64,192,128,0.3); }
+  .toggle-btn:hover { filter:brightness(1.2); transform:scale(1.04); }
+
+  /* SKEWER TRACKER */
+  .skewer-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:var(--radius); padding:16px 18px; margin-bottom:20px;
+    transition:border-color 0.3s;
+  }
+  .skewer-card:hover { border-color:rgba(232,160,32,0.3); }
+
+  .skewer-header {
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .skewer-header-icon {
+    width:34px; height:34px; border-radius:9px;
+    background:rgba(232,160,32,0.12);
+    display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+  }
+  .skewer-header-text { flex:1; }
+  .skewer-header-text .sh-title { font-size:0.88rem; font-weight:800; }
+  .skewer-header-text .sh-sub   { font-size:0.7rem; color:var(--muted); margin-top:1px; }
+
+  .skewer-slots {
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+  }
+
+  .skewer-slot {
+    border-radius:12px; padding:12px 14px;
+    border:1px solid var(--border); background:var(--surface);
+    transition:all 0.25s;
+  }
+  .skewer-slot.active-slot {
+    border-color:rgba(232,160,32,0.5);
+    background:rgba(232,160,32,0.07);
+    box-shadow:0 0 16px rgba(232,160,32,0.1);
+  }
+  .skewer-slot.next-slot {
+    border-color:rgba(80,144,224,0.4);
+    background:rgba(80,144,224,0.06);
+  }
+  .slot-label {
+    font-size:0.66rem; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; margin-bottom:8px;
+  }
+  .active-slot .slot-label { color:var(--accent); }
+  .next-slot   .slot-label { color:var(--blue); }
+  .slot-label.empty-lbl    { color:var(--muted); }
+
+  .slot-weight {
+    font-size:1.6rem; font-weight:900; line-height:1;
+    margin-bottom:4px;
+  }
+  .active-slot .slot-weight { color:var(--accent); }
+  .next-slot   .slot-weight { color:var(--blue); }
+  .slot-weight.empty-w      { color:var(--border); font-size:1.1rem; font-weight:400; }
+
+  .slot-unit { font-size:0.7rem; color:var(--muted); }
+
+  .skewer-btns {
+    display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;
+  }
+  .kg-btn {
+    flex:1; min-width:52px; padding:7px 4px;
+    border-radius:8px; font-family:'Tajawal',sans-serif;
+    font-size:0.82rem; font-weight:800; cursor:pointer;
+    border:1px solid var(--border); background:var(--surface);
+    color:var(--muted); transition:all 0.2s;
+  }
+  .kg-btn:hover       { border-color:var(--accent); color:var(--accent); }
+  .kg-btn.selected    { background:var(--accent); color:#000; border-color:var(--accent); box-shadow:0 0 10px rgba(232,160,32,0.35); }
+  .skewer-slot-footer { font-size:0.68rem; color:var(--muted); margin-top:6px; }
+
+  @keyframes fadeIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  .fade-in { animation:fadeIn 0.35s ease both; }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-btn" href="index.html" title="رجوع">→</a>
+  <div class="logo">🥙</div>
+  <div class="header-info">
+    <h1 id="hName">جارٍ التحميل…</h1>
+    <p id="hSub">ملخص الإغلاق اليومي</p>
+  </div>
+  <div class="header-date" id="hDate"></div>
+</header>
+
+<main>
+  <!-- STATUS TOGGLE -->
+  <div class="status-banner open fade-in" id="statusBanner">
+    <div class="status-left">
+      <div class="status-pulse"><span></span><span></span></div>
+      <div class="status-text-wrap">
+        <div class="status-title" id="statusTitle">الفرع مفتوح الآن</div>
+        <div class="status-since" id="statusSince">منذ —</div>
+      </div>
+    </div>
+    <button class="toggle-btn" id="toggleBtn" onclick="toggleStatus()">إغلاق الفرع</button>
+  </div>
+
+  <!-- SKEWER TRACKER -->
+  <div class="skewer-card fade-in">
+    <div class="skewer-header">
+      <div class="skewer-header-icon">🍢</div>
+      <div class="skewer-header-text">
+        <div class="sh-title">متابعة الأسياخ</div>
+        <div class="sh-sub">السيخ الحالي والقادم</div>
+      </div>
+    </div>
+    <div class="skewer-slots">
+
+      <!-- السيخ الحالي -->
+      <div class="skewer-slot active-slot" id="slot1">
+        <div class="slot-label">السيخ الحالي 🔥</div>
+        <div class="slot-weight empty-w" id="slot1Weight">—</div>
+        <div class="slot-unit">كيلوغرام</div>
+        <div class="skewer-btns">
+          <button class="kg-btn" onclick="setSkewer(1,10)">١٠ كغ</button>
+          <button class="kg-btn" onclick="setSkewer(1,15)">١٥ كغ</button>
+          <button class="kg-btn" onclick="setSkewer(1,20)">٢٠ كغ</button>
+        </div>
+        <div class="skewer-slot-footer" id="slot1Time"></div>
+      </div>
+
+      <!-- السيخ القادم -->
+      <div class="skewer-slot next-slot" id="slot2">
+        <div class="slot-label">السيخ القادم ⏭</div>
+        <div class="slot-weight empty-w" id="slot2Weight">—</div>
+        <div class="slot-unit">كيلوغرام</div>
+        <div class="skewer-btns">
+          <button class="kg-btn" onclick="setSkewer(2,10)">١٠ كغ</button>
+          <button class="kg-btn" onclick="setSkewer(2,15)">١٥ كغ</button>
+          <button class="kg-btn" onclick="setSkewer(2,20)">٢٠ كغ</button>
+        </div>
+        <div class="skewer-slot-footer" id="slot2Time"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DATE CHIPS -->
+  <div class="date-bar" id="dateBar"></div>
+
+  <!-- TOTAL -->
+  <div class="total-card fade-in">
+    <div class="total-left">
+      <div class="lbl">إجمالي الإيرادات</div>
+      <div class="val" id="totalRev">0.00</div>
+      <div class="sub">ريال سعودي</div>
+    </div>
+    <div class="total-right">
+      <div class="lbl">صافي اليوم</div>
+      <div class="val pos" id="netVal">0.00</div>
+      <div class="sub" id="netSub">بعد المصروفات</div>
+    </div>
+  </div>
+
+  <!-- INCOME -->
+  <div class="section-lbl">الإيرادات</div>
+  <div class="entry-list" id="incomeList"></div>
+
+  <!-- EXPENSES -->
+  <div class="section-lbl">المصروفات</div>
+  <div class="entry-list" id="expenseList"></div>
+
+  <!-- OPERATIONS -->
+  <div class="section-lbl">تشغيل الفرع</div>
+  <div class="ops-grid">
+
+    <!-- وقت الافتتاح -->
+    <div class="ops-card">
+      <div class="ops-top">
+        <div class="ops-icon icon-time-open">🔓</div>
+        <div>
+          <div class="ops-label">وقت الافتتاح</div>
+          <div class="ops-sub">بداية الدوام</div>
+        </div>
+      </div>
+      <input class="ops-input" type="time" id="inp_open_time">
+    </div>
+
+    <!-- وقت استلام المواد -->
+    <div class="ops-card">
+      <div class="ops-top">
+        <div class="ops-icon icon-time-supply">🚚</div>
+        <div>
+          <div class="ops-label">استلام المواد</div>
+          <div class="ops-sub">وقت التوريد</div>
+        </div>
+      </div>
+      <input class="ops-input" type="time" id="inp_supply_time">
+    </div>
+
+    <!-- عدد أسياخ الشاورما -->
+    <div class="ops-card">
+      <div class="ops-top">
+        <div class="ops-icon icon-skewers">🍢</div>
+        <div>
+          <div class="ops-label">أسياخ الشاورما</div>
+          <div class="ops-sub">عدد الأسياخ المستخدمة</div>
+        </div>
+      </div>
+      <input class="ops-input" type="number" id="inp_skewers" min="0" placeholder="0 سيخ">
+    </div>
+
+    <!-- كمية الدجاج الفائضة -->
+    <div class="ops-card">
+      <div class="ops-top">
+        <div class="ops-icon icon-chicken">🍗</div>
+        <div>
+          <div class="ops-label">دجاج فائض</div>
+          <div class="ops-sub">الكمية بالكيلوغرام</div>
+        </div>
+      </div>
+      <input class="ops-input" type="number" id="inp_chicken_surplus" min="0" step="0.1" placeholder="0.0 كغ">
+    </div>
+
+    <!-- وقت الإغلاق -->
+    <div class="ops-card wide">
+      <div class="ops-top">
+        <div class="ops-icon icon-time-close">🔒</div>
+        <div>
+          <div class="ops-label">وقت الإغلاق</div>
+          <div class="ops-sub">نهاية الدوام الفعلية</div>
+        </div>
+      </div>
+      <input class="ops-input" type="time" id="inp_close_time">
+    </div>
+
+  </div>
+
+  <!-- NOTES / PROBLEMS -->
+  <div class="section-lbl">ملاحظات</div>
+  <div class="notes-card">
+    <div class="notes-top">
+      <div class="notes-icon">⚠️</div>
+      <div>
+        <div class="notes-label">مشكلة / ملاحظة اليوم</div>
+        <div class="notes-sub">اكتب أي مشكلة واجهت الفرع أو ملاحظة مهمة</div>
+      </div>
+    </div>
+    <textarea class="ops-input" id="inp_notes" placeholder="مثال: انقطع الكهرباء لمدة ساعة، عطل في جهاز الشبكة، غياب موظف…"></textarea>
+  </div>
+
+  <!-- SAVE -->
+  <button class="save-btn" onclick="saveDay()">
+    <span>💾</span><span>حفظ ملخص اليوم</span>
+  </button>
+
+  <!-- HISTORY -->
+  <div class="history-wrap" id="historyWrap" style="display:none">
+    <div class="history-title">سجل الأيام السابقة</div>
+    <div class="history-card">
+      <div class="h-head">
+        <span>التاريخ</span><span>الإيرادات</span><span>المصروف</span><span>الصافي</span>
+      </div>
+      <div id="historyRows"></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast">✔ تم الحفظ بنجاح</div>
+
+<script>
+const BRANCHES = {
+  'xK9mQp3w': 'فرع النرجس',
+  'Tz7nRj2v': 'فرع حطين',
+  'Lw4bNc8s': 'فرع الرمال',
+  'Ym6dFh1x': 'فرع العزيزية',
+  'Qs5kWe9t': 'فرع النظيم',
+  'Br3nVm7p': 'فرع ديراب',
+  'Cx2gHu4f': 'فرع السويدي',
+  'Jd8rZo6l': 'فرع الشفا',
+  'Pk1sTy5a': 'فرع حايل',
+  'Wn9eAb3m': 'فرع ينبع',
+  'Gf7vLq2k': 'فرع الحسا',
+  'Uh4cMx8d': 'فرع الدوادمي'
+};
+
+const INCOME_FIELDS = [
+  { id:'cash',    label:'الكاش',      sub:'مبيعات نقدية',            icon:'💵', cls:'icon-cash'    },
+  { id:'network', label:'الشبكة',     sub:'مدى / Visa / ماستر',      icon:'💳', cls:'icon-network'  },
+  { id:'apps',    label:'التطبيقات',  sub:'طلبات / جاهز / نون فود',  icon:'📱', cls:'icon-apps'     },
+  { id:'deliver', label:'التوصيل',    sub:'توصيل مباشر / مسافر',     icon:'🛵', cls:'icon-deliver'  },
+];
+const EXPENSE_FIELDS = [
+  { id:'expenses', label:'المصروفات', sub:'مواد خام / تشغيل / صيانة', icon:'📋', cls:'icon-expense' },
+];
+
+// حقول التشغيل والملاحظات
+const OPS_IDS = ['open_time','supply_time','skewers','chicken_surplus','close_time','notes'];
+
+// ── INIT ──
+const params     = new URLSearchParams(location.search);
+const token      = params.get('id') || '';
+const branchName = BRANCHES[token] || null;
+
+// لو الرابط غلط — أظهر صفحة خطأ
+if (!branchName) {
+  document.body.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+    height:100vh;font-family:Tajawal,sans-serif;background:#0a0a0f;color:#888;text-align:center;gap:16px">
+      <div style="font-size:3rem">🔒</div>
+      <div style="font-size:1.2rem;font-weight:800;color:#f0eee8">رابط غير صحيح</div>
+      <div style="font-size:0.85rem">تواصل مع المدير للحصول على رابط فرعك</div>
+      <a href="index.html" style="margin-top:12px;padding:10px 24px;background:#e8a020;color:#000;
+      border-radius:10px;text-decoration:none;font-weight:800;font-size:0.9rem">الرئيسية</a>
+    </div>`;
+  throw new Error('invalid token');
+}
+
+document.title = `${branchName} — ملخص الإغلاق`;
+document.getElementById('hName').textContent = branchName;
+document.getElementById('hSub').textContent  = 'ملخص الإغلاق اليومي';
+document.getElementById('hDate').textContent =
+  new Date().toLocaleDateString('ar-SA',{weekday:'short',month:'short',day:'numeric'});
+
+let currentDate = todayStr();
+
+function todayStr()       { return new Date().toISOString().slice(0,10); }
+function fmt(n)           { return n.toLocaleString('ar-SA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function storageKey(date) { return `${branchName}__${date}`; }
+function allData()        { return JSON.parse(localStorage.getItem('shawarma_data')||'{}'); }
+function saveData(d)      { localStorage.setItem('shawarma_data', JSON.stringify(d)); }
+
+// ── DATE CHIPS ──
+function buildDateChips() {
+  const bar = document.getElementById('dateBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const str = d.toISOString().slice(0,10);
+    const chip = document.createElement('div');
+    chip.className = 'date-chip' + (str===currentDate?' active':'');
+    chip.textContent = i===0?'اليوم':i===1?'أمس':d.toLocaleDateString('ar-SA',{weekday:'short',month:'short',day:'numeric'});
+    chip.onclick = ()=>{
+      currentDate = str;
+      document.querySelectorAll('.date-chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      loadDay();
+    };
+    bar.appendChild(chip);
+  }
+}
+
+// ── ENTRY ROWS (money) ──
+function makeRow(f) {
+  const row = document.createElement('div');
+  row.className = 'entry-row';
+  row.innerHTML = `
+    <div class="entry-icon ${f.cls}">${f.icon}</div>
+    <div class="entry-info">
+      <div class="entry-name">${f.label}</div>
+      <div class="entry-sub">${f.sub}</div>
+    </div>
+    <div class="input-wrap">
+      <input class="entry-input" id="inp_${f.id}" type="number" min="0" step="0.01" placeholder="0.00" oninput="recalc()">
+      <span class="cur-lbl">ر.س</span>
+    </div>`;
+  return row;
+}
+
+function buildForms() {
+  const il = document.getElementById('incomeList');
+  const el = document.getElementById('expenseList');
+  il.innerHTML = ''; el.innerHTML = '';
+  INCOME_FIELDS.forEach(f=>il.appendChild(makeRow(f)));
+  EXPENSE_FIELDS.forEach(f=>el.appendChild(makeRow(f)));
+}
+
+// ── RECALC ──
+function recalc() {
+  let rev=0, exp=0;
+  INCOME_FIELDS.forEach(f=>{ rev+=parseFloat(document.getElementById('inp_'+f.id)?.value||0); });
+  EXPENSE_FIELDS.forEach(f=>{ exp+=parseFloat(document.getElementById('inp_'+f.id)?.value||0); });
+  const net = rev - exp;
+  document.getElementById('totalRev').textContent = fmt(rev);
+  const nEl = document.getElementById('netVal');
+  nEl.textContent = fmt(net);
+  nEl.className = 'val '+(net>=0?'pos':'neg');
+  document.getElementById('netSub').textContent = exp>0?`مصروفات: ${fmt(exp)} ر.س`:'بعد المصروفات';
+}
+
+// ── LOAD DAY ──
+function loadDay() {
+  const data = allData()[storageKey(currentDate)] || {};
+
+  // money fields
+  [...INCOME_FIELDS,...EXPENSE_FIELDS].forEach(f=>{
+    const el = document.getElementById('inp_'+f.id);
+    if(el) el.value = data[f.id]!==undefined ? data[f.id] : '';
+  });
+
+  // ops + notes fields
+  OPS_IDS.forEach(id=>{
+    const el = document.getElementById('inp_'+id);
+    if(el) el.value = data[id] !== undefined ? data[id] : '';
+  });
+
+  recalc();
+  renderHistory();
+}
+
+// ── SAVE DAY ──
+function saveDay() {
+  const all   = allData();
+  const entry = {};
+
+  // money
+  [...INCOME_FIELDS,...EXPENSE_FIELDS].forEach(f=>{
+    entry[f.id] = parseFloat(document.getElementById('inp_'+f.id)?.value||0);
+  });
+
+  // ops + notes
+  OPS_IDS.forEach(id=>{
+    const el = document.getElementById('inp_'+id);
+    entry[id] = el ? el.value : '';
+  });
+
+  all[storageKey(currentDate)] = entry;
+  saveData(all);
+  renderHistory();
+  showToast();
+}
+
+// ── HISTORY ──
+function renderHistory() {
+  const all   = allData();
+  const dates = Object.keys(all)
+    .filter(k=>k.startsWith(branchName+'__'))
+    .map(k=>k.replace(branchName+'__',''))
+    .sort((a,b)=>b.localeCompare(a))
+    .slice(0,14);
+
+  const wrap = document.getElementById('historyWrap');
+  const rows = document.getElementById('historyRows');
+  if(!dates.length){ wrap.style.display='none'; return; }
+  wrap.style.display='block';
+  rows.innerHTML='';
+
+  dates.forEach(date=>{
+    const d=all[`${branchName}__${date}`]||{};
+    let rev=0,exp=0;
+    INCOME_FIELDS.forEach(f=>rev+=(d[f.id]||0));
+    EXPENSE_FIELDS.forEach(f=>exp+=(d[f.id]||0));
+    const net=rev-exp;
+    const dd=new Date(date+'T00:00:00');
+    const label=dd.toLocaleDateString('ar-SA',{weekday:'short',month:'short',day:'numeric'});
+
+    // badge for notes
+    const hasNote = d.notes && d.notes.trim().length>0;
+    const noteBadge = hasNote ? ' ⚠️' : '';
+
+    const row=document.createElement('div');
+    row.className='h-row';
+    row.title = hasNote ? `ملاحظة: ${d.notes}` : 'انقر لتحميل هذا اليوم';
+    row.innerHTML=`
+      <span class="d-col">${label}${noteBadge}</span>
+      <span class="r-col">${fmt(rev)}</span>
+      <span class="e-col">${fmt(exp)}</span>
+      <span class="n-col ${net>=0?'pos':'neg'}">${fmt(net)}</span>`;
+    row.onclick=()=>{
+      currentDate=date;
+      document.querySelectorAll('.date-chip').forEach(c=>c.classList.remove('active'));
+      loadDay();
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    rows.appendChild(row);
+  });
+}
+
+// ── TOAST ──
+function showToast() {
+  const t=document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── STATUS TOGGLE ──
+const STATUS_KEY = `status__${branchName}`;
+
+function getStatus() {
+  return JSON.parse(localStorage.getItem(STATUS_KEY) || '{"isOpen":false,"since":null}');
+}
+function setStatus(obj) {
+  localStorage.setItem(STATUS_KEY, JSON.stringify(obj));
+}
+
+function renderStatus() {
+  const { isOpen, since } = getStatus();
+  const banner  = document.getElementById('statusBanner');
+  const title   = document.getElementById('statusTitle');
+  const sinceEl = document.getElementById('statusSince');
+  const btn     = document.getElementById('toggleBtn');
+
+  if (isOpen) {
+    banner.className = 'status-banner open fade-in';
+    title.textContent = 'الفرع مفتوح الآن';
+    btn.textContent   = 'إغلاق الفرع';
+    if (since) {
+      const diff = Math.floor((Date.now() - since) / 60000);
+      const hrs  = Math.floor(diff / 60);
+      const mins = diff % 60;
+      const timeStr = new Date(since).toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+      sinceEl.textContent = `مفتوح منذ ${timeStr} — (${hrs > 0 ? hrs+'س ' : ''}${mins}د)`;
+    } else {
+      sinceEl.textContent = 'مفتوح';
+    }
+  } else {
+    banner.className = 'status-banner closed fade-in';
+    title.textContent = 'الفرع مغلق الآن';
+    btn.textContent   = 'فتح الفرع';
+    if (since) {
+      const timeStr = new Date(since).toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+      sinceEl.textContent = `أُغلق عند ${timeStr}`;
+    } else {
+      sinceEl.textContent = '—';
+    }
+  }
+}
+
+function toggleStatus() {
+  const { isOpen } = getStatus();
+  setStatus({ isOpen: !isOpen, since: Date.now() });
+  renderStatus();
+
+  // flash animation
+  const banner = document.getElementById('statusBanner');
+  banner.style.transform = 'scale(0.97)';
+  setTimeout(()=>{ banner.style.transform = 'scale(1)'; banner.style.transition='transform 0.25s ease'; }, 150);
+}
+
+// update "منذ" every minute while open
+setInterval(renderStatus, 60000);
+
+// ── SKEWER TRACKER ──
+const SKEWER_KEY = `skewers__${branchName}`;
+
+function getSkewerData() {
+  return JSON.parse(localStorage.getItem(SKEWER_KEY) || '{"slot1":null,"slot2":null,"slot1Time":null,"slot2Time":null}');
+}
+function saveSkewerData(obj) {
+  localStorage.setItem(SKEWER_KEY, JSON.stringify(obj));
+}
+
+const KG_LABELS = { 10:'١٠', 15:'١٥', 20:'٢٠' };
+
+function renderSkewerTracker() {
+  const d = getSkewerData();
+
+  [1,2].forEach(slot => {
+    const kg       = d[`slot${slot}`];
+    const ts       = d[`slot${slot}Time`];
+    const wEl      = document.getElementById(`slot${slot}Weight`);
+    const timeEl   = document.getElementById(`slot${slot}Time`);
+    const btns     = document.querySelectorAll(`#slot${slot} .kg-btn`);
+
+    if (kg) {
+      wEl.textContent = KG_LABELS[kg];
+      wEl.className   = 'slot-weight';
+      const timeStr   = ts ? new Date(ts).toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'}) : '';
+      timeEl.textContent = timeStr ? `علّق ${timeStr}` : '';
+    } else {
+      wEl.textContent = '—';
+      wEl.className   = 'slot-weight empty-w';
+      timeEl.textContent = 'لم يُعلَّق بعد';
+    }
+
+    // highlight selected btn
+    btns.forEach(btn => {
+      const val = parseInt(btn.textContent);  // won't work with arabic — use data
+      btn.classList.remove('selected');
+    });
+    if (kg) {
+      const selectedBtn = [...document.querySelectorAll(`#slot${slot} .kg-btn`)]
+        .find(b => b.getAttribute('data-kg') == kg);
+      if (selectedBtn) selectedBtn.classList.add('selected');
+    }
+  });
+}
+
+function setSkewer(slot, kg) {
+  const d = getSkewerData();
+  d[`slot${slot}`]     = kg;
+  d[`slot${slot}Time`] = Date.now();
+  saveSkewerData(d);
+  renderSkewerTracker();
+}
+
+// attach data-kg to buttons after DOM ready
+function initSkewerBtns() {
+  document.querySelectorAll('.kg-btn').forEach(btn => {
+    const txt = btn.textContent.trim();
+    const map = {'١٠ كغ':10, '١٥ كغ':15, '٢٠ كغ':20};
+    btn.setAttribute('data-kg', map[txt] || 0);
+  });
+}
+
+// ── START ──
+buildDateChips();
+buildForms();
+loadDay();
+renderStatus();
+initSkewerBtns();
+renderSkewerTracker();
+</script>
+
+<!-- PIN SCREEN -->
+<div id="pinScreen" style="
+  display:none; position:fixed; inset:0; z-index:9999;
+  background:#0a0a0f; font-family:'Tajawal',sans-serif;
+  flex-direction:column; align-items:center; justify-content:center; gap:0;
+">
+  <div style="text-align:center; margin-bottom:32px;">
+    <div style="font-size:2.5rem; margin-bottom:12px;">🔐</div>
+    <div style="font-size:1.2rem; font-weight:900; color:#f0eee8;" id="pinBranchLabel">—</div>
+    <div style="font-size:0.78rem; color:#888; margin-top:6px;">أدخل رمز الدخول للمتابعة</div>
+  </div>
+
+  <!-- PIN DOTS -->
+  <div style="display:flex; gap:14px; margin-bottom:32px;" id="pinDots">
+    <div class="pdot" id="pd0"></div>
+    <div class="pdot" id="pd1"></div>
+    <div class="pdot" id="pd2"></div>
+    <div class="pdot" id="pd3"></div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="pinError" style="
+    color:#e05050; font-size:0.8rem; font-weight:700;
+    margin-bottom:16px; min-height:20px; transition:opacity 0.3s;
+    opacity:0;
+  ">رمز خاطئ — حاول مجدداً</div>
+
+  <!-- NUMPAD -->
+  <div style="display:grid; grid-template-columns:repeat(3,72px); gap:12px;">
+    <button class="pkey" onclick="pinPress('1')">١</button>
+    <button class="pkey" onclick="pinPress('2')">٢</button>
+    <button class="pkey" onclick="pinPress('3')">٣</button>
+    <button class="pkey" onclick="pinPress('4')">٤</button>
+    <button class="pkey" onclick="pinPress('5')">٥</button>
+    <button class="pkey" onclick="pinPress('6')">٦</button>
+    <button class="pkey" onclick="pinPress('7')">٧</button>
+    <button class="pkey" onclick="pinPress('8')">٨</button>
+    <button class="pkey" onclick="pinPress('9')">٩</button>
+    <button class="pkey pkey-clear" onclick="pinClear()">مسح</button>
+    <button class="pkey" onclick="pinPress('0')">٠</button>
+    <button class="pkey pkey-del" onclick="pinDel()">⌫</button>
+  </div>
+</div>
+
+<style>
+.pdot {
+  width:16px; height:16px; border-radius:50%;
+  background:#2a2a3a; border:2px solid #3a3a4a;
+  transition:all 0.15s;
+}
+.pdot.filled { background:#e8a020; border-color:#e8a020; box-shadow:0 0 10px rgba(232,160,32,0.5); }
+.pdot.shake  { animation: pdShake 0.4s ease; }
+
+@keyframes pdShake {
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+
+.pkey {
+  width:72px; height:72px; border-radius:50%;
+  background:#1a1a24; border:1px solid #2a2a3a;
+  color:#f0eee8; font-family:'Tajawal',sans-serif;
+  font-size:1.5rem; font-weight:800; cursor:pointer;
+  transition:all 0.15s; display:flex; align-items:center; justify-content:center;
+}
+.pkey:hover  { background:#252530; border-color:#e8a020; }
+.pkey:active { transform:scale(0.92); background:#2a2a38; }
+.pkey-clear  { font-size:0.75rem; color:#888; }
+.pkey-del    { font-size:1.1rem; }
+</style>
+
+<script>
+// ── PIN LOGIC ──
+const PIN_KEY = `pin__${token}`;
+const DEFAULT_PIN = '1234';
+
+let pinInput = '';
+
+function getPIN() {
+  return localStorage.getItem(PIN_KEY) || DEFAULT_PIN;
+}
+
+function showPinScreen() {
+  const ps = document.getElementById('pinScreen');
+  ps.style.display = 'flex';
+  document.getElementById('pinBranchLabel').textContent = branchName || '—';
+  pinInput = '';
+  updatePinDots();
+}
+
+function hidePinScreen() {
+  document.getElementById('pinScreen').style.display = 'none';
+}
+
+function updatePinDots() {
+  for(let i=0;i<4;i++){
+    const d = document.getElementById('pd'+i);
+    d.classList.toggle('filled', i < pinInput.length);
+  }
+}
+
+function pinPress(digit) {
+  if(pinInput.length >= 4) return;
+  pinInput += digit;
+  updatePinDots();
+  if(pinInput.length === 4) {
+    setTimeout(checkPIN, 150);
+  }
+}
+
+function pinDel() {
+  pinInput = pinInput.slice(0,-1);
+  updatePinDots();
+}
+
+function pinClear() {
+  pinInput = '';
+  updatePinDots();
+}
+
+function checkPIN() {
+  if(pinInput === getPIN()) {
+    // حفظ الجلسة لمدة 8 ساعات
+    sessionStorage.setItem('auth__'+token, Date.now());
+    hidePinScreen();
+  } else {
+    // اهتزاز + خطأ
+    document.querySelectorAll('.pdot').forEach(d=>{ d.classList.add('shake'); setTimeout(()=>d.classList.remove('shake'),400); });
+    const errEl = document.getElementById('pinError');
+    errEl.style.opacity = '1';
+    setTimeout(()=>{ errEl.style.opacity='0'; },2000);
+    pinInput = '';
+    setTimeout(updatePinDots, 400);
+  }
+}
+
+function checkSession() {
+  if(!branchName) return;
+  const ts = sessionStorage.getItem('auth__'+token);
+  if(!ts) { showPinScreen(); return; }
+  // انتهت الجلسة بعد 8 ساعات
+  const eightHours = 8 * 60 * 60 * 1000;
+  if(Date.now() - parseInt(ts) > eightHours) {
+    sessionStorage.removeItem('auth__'+token);
+    showPinScreen();
+  }
+}
+
+checkSession();
+</script>
